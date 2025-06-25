@@ -106,47 +106,47 @@ internal class ApkInfoHandler : IApkInfoHandler<ApkInfo>
                                 case "label":
                                 case "icon":
                                     {
-                                        var id = Convert.ToUInt32(attribute.Value.TrimStart('@'), 16);
-                                        foreach (var package in resources.Packages)
+                                        var value = attribute.Value;
+                                        if (!string.IsNullOrEmpty(value) && value.StartsWith("@"))
                                         {
-                                            foreach (var table in package.Tables)
+                                            var hex = value.Substring(1);
+                                            if (uint.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out uint id))
                                             {
-                                                if (table.Values.ContainsKey(id))
+                                                foreach (var package in resources.Packages)
                                                 {
-                                                    var value = table.Values[id];
-                                                    var str = resources.GlobalStringPool.GetString(value.StringValue);
-                                                    switch (attribute.LocalName)
+                                                    foreach (var table in package.Tables)
                                                     {
-                                                        case "label":
-                                                            var local = table.Config.GetLocal();
-                                                            if (string.IsNullOrEmpty(local))
+                                                        if (table.Values.ContainsKey(id))
+                                                        {
+                                                            var val = table.Values[id];
+                                                            var str = resources.GlobalStringPool.GetString(val.StringValue);
+                                                            switch (attribute.LocalName)
                                                             {
-                                                                apkInfo.Label = str;
-                                                            }
-                                                            else
-                                                            {
-                                                                apkInfo.Labels[local] = str;
-                                                            }
-                                                            break;
-
-                                                        case "icon":
-                                                            var dpi = table.Config.ScreenTypeDensity;
-                                                            switch (dpi)
-                                                            {
-                                                                case ConfigDensity.DENSITY_DEFAULT:
-                                                                case ConfigDensity.DENSITY_NONE:
-                                                                    apkInfo.Icon = str;
-                                                                    break;
-
-                                                                default:
-                                                                    if (String.IsNullOrEmpty(apkInfo.Icon))
+                                                                case "label":
+                                                                    var local = table.Config.GetLocal();
+                                                                    if (string.IsNullOrEmpty(local))
                                                                     {
-                                                                        apkInfo.Icon = str;
+                                                                        apkInfo.Label = str;
                                                                     }
-                                                                    apkInfo.Icons[dpi.ToString("D")] = str;
+                                                                    else
+                                                                    {
+                                                                        apkInfo.Labels[local] = str;
+                                                                    }
+                                                                    break;
+
+                                                                case "icon":
+                                                                    var dpi = table.Config.ScreenTypeDensity;
+                                                                    if (dpi != ConfigDensity.DENSITY_DEFAULT && dpi != ConfigDensity.DENSITY_NONE)
+                                                                    {
+                                                                        apkInfo.Icons[dpi.ToString("D")] = str;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        apkInfo.Icons["default"] = str;
+                                                                    }
                                                                     break;
                                                             }
-                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -154,6 +154,49 @@ internal class ApkInfoHandler : IApkInfoHandler<ApkInfo>
                                     }
                                     break;
                             }
+                        }
+                    }
+                    if (apkInfo.Icons.Count > 0)
+                    {
+                        int maxDpi = -1;
+                        string maxImageIcon = null;
+                        int maxImageDpi = -1;
+                        string maxXmlIcon = null;
+                        int maxXmlDpi = -1;
+                        foreach (var kv in apkInfo.Icons)
+                        {
+                            int dpi;
+                            if (!int.TryParse(kv.Key, out dpi))
+                                continue;
+                            var v = kv.Value;
+                            if (v != null && (v.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || v.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || v.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) || v.EndsWith(".webp", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                if (dpi > maxImageDpi)
+                                {
+                                    maxImageDpi = dpi;
+                                    maxImageIcon = v;
+                                }
+                            }
+                            else if (v != null && v.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (dpi > maxXmlDpi)
+                                {
+                                    maxXmlDpi = dpi;
+                                    maxXmlIcon = v;
+                                }
+                            }
+                        }
+                        if (maxImageIcon != null)
+                        {
+                            apkInfo.Icon = maxImageIcon;
+                        }
+                        else if (maxXmlIcon != null)
+                        {
+                            apkInfo.Icon = maxXmlIcon;
+                        }
+                        else if (apkInfo.Icons.ContainsKey("default"))
+                        {
+                            apkInfo.Icon = apkInfo.Icons["default"];
                         }
                     }
                     var xnames = new List<string>();
