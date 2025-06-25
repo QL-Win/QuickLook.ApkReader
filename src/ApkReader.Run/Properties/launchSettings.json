@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ApkReader.Run": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\ema\\Desktop\\LocalSend-1.16.1-android-arm32v7.apk"
+    }
+  }
+}
