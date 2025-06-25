@@ -5,7 +5,7 @@
         <LangVersion>latest</LangVersion>
         <AssemblyName>QuickLook.ApkReader</AssemblyName>
         <RootNamespace>ApkReader</RootNamespace>
-        <Version>2.0.1.1</Version>
+        <Version>2.0.2.0</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Soar360</Authors>
         <Description>read apk info (package name etc..) with out appt.</Description>
