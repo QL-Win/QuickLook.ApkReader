@@ -14,6 +14,9 @@
         <PackageTags>android apk apk-reader aapt</PackageTags>
         <RepositoryType>git</RepositoryType>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>app.png</PackageIcon>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFramework)'=='net462'">
@@ -31,6 +34,16 @@
     <ItemGroup Condition="'$(TargetFramework)'=='net462'">
         <Reference Include="System.IO.Compression" />
         <EmbeddedResource Include="Values\public.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="app.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </Content>
+
+        <None Include="..\..\README.md" Pack="true" PackagePath="" />
+        <None Remove="app.png" />
     </ItemGroup>
 
 </Project>

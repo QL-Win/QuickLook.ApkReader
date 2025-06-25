@@ -158,7 +158,6 @@ internal class ApkInfoHandler : IApkInfoHandler<ApkInfo>
                     }
                     if (apkInfo.Icons.Count > 0)
                     {
-                        int maxDpi = -1;
                         string maxImageIcon = null;
                         int maxImageDpi = -1;
                         string maxXmlIcon = null;
