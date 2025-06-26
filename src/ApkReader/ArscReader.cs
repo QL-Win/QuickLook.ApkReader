@@ -84,7 +84,7 @@ public static class ArscReader
                                 {
                                     continue;
                                 }
-                                var resourceId = (packageHeader.Id << 24) | (table.RawID << 16) | i;
+                                var resourceId = (packageHeader.Id << 24) | (table.RawID << 16) | (uint)i;
                                 var entry = reader.ReadResTable_entry();
                                 entries[i] = entry;
                                 if ((entry.Flags & EntryFlags.FLAG_COMPLEX) == 0)
