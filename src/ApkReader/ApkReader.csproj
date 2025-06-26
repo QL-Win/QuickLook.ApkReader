@@ -19,18 +19,6 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)'=='net462'">
-        <DefineConstants>NET46;INNER_ZIP</DefineConstants>
-    </PropertyGroup>
-    
-    <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-        <DefineConstants>NETSTANDARD20;INNER_ZIP</DefineConstants>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
-        <DefineConstants>NETSTANDARD21;INNER_ZIP</DefineConstants>
-    </PropertyGroup>
-
     <ItemGroup Condition="'$(TargetFramework)'=='net462'">
         <Reference Include="System.IO.Compression" />
         <EmbeddedResource Include="Values\public.xml" />

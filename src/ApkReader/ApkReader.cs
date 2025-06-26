@@ -1,23 +1,13 @@
-﻿using System;
+﻿using ApkReader.Arsc;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
-using ApkReader.Arsc;
-
-#if INNER_ZIP
-
 using System.IO.Compression;
-
-#else
-using Ionic.Zip;
-
-#endif
+using System.Xml;
 
 namespace ApkReader;
 
-public class ApkReader : ApkReader<ApkInfo>
-{
-}
+public class ApkReader : ApkReader<ApkInfo>;
 
 public class ApkReader<TApkInfo> where TApkInfo : ApkInfo, new()
 {
@@ -59,7 +49,6 @@ public class ApkReader<TApkInfo> where TApkInfo : ApkInfo, new()
     protected virtual Dictionary<string, byte[]> ReadResources(Stream stream)
     {
         var dic = new Dictionary<string, byte[]>(StringComparer.CurrentCultureIgnoreCase);
-#if INNER_ZIP
         using (var zip = new ZipArchive(stream))
         {
             foreach (var entry in zip.Entries)
@@ -75,32 +64,6 @@ public class ApkReader<TApkInfo> where TApkInfo : ApkInfo, new()
                 }
             }
         }
-#else
-        using (var zip = ZipFile.Read(stream))
-        {
-            foreach (var entry in zip.Entries)
-            {
-                if (CheckIsResources(entry.FileName))
-                {
-                    using (var zs = entry.OpenReader())
-                    using (var ms = new MemoryStream())
-                    {
-                        var buffer = new byte[2048];
-                        int total;
-                        do
-                        {
-                            total = zs.Read(buffer, 0, buffer.Length);
-                            if (total > 0)
-                            {
-                                ms.Write(buffer, 0, total);
-                            }
-                        } while (total > 0);
-                        dic[entry.FileName] = ms.ToArray();
-                    }
-                }
-            }
-        }
-#endif
         return dic;
     }
 
