@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Xml;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ApkReader;
 
@@ -39,6 +40,10 @@ public class AabReader<TAabInfo> where TAabInfo : AabInfo, new()
             return true;
         }
         if ("base/resources.pb".Equals(fileName, StringComparison.CurrentCultureIgnoreCase))
+        {
+            return true;
+        }
+        if (fileName.StartsWith("base/res/mipmap-"))
         {
             return true;
         }
@@ -96,7 +101,27 @@ public class AabReader<TAabInfo> where TAabInfo : AabInfo, new()
         {
             handler.Execute(androidManifest, resourcesPb, aabInfo);
         }
+        foreach (var res in resources)
+        {
+            if (res.Key.StartsWith("base/res/mipmap-"))
+            {
+                aabInfo.Icons.Add(ComputeMD5Hash(res.Key).Substring(0, 6), res.Key);
+            }
+        }
         return aabInfo;
+
+        static string ComputeMD5Hash(string input)
+        {
+            using MD5 md5 = MD5.Create();
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            var sb = new StringBuilder();
+            foreach (byte b in hashBytes)
+                sb.Append(b.ToString("x2"));
+
+            return sb.ToString();
+        }
     }
 
     public virtual TAabInfo Read(string apkPath)
