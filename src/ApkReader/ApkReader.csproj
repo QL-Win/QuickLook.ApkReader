@@ -5,13 +5,13 @@
         <LangVersion>latest</LangVersion>
         <AssemblyName>QuickLook.ApkReader</AssemblyName>
         <RootNamespace>ApkReader</RootNamespace>
-        <Version>2.0.2.0</Version>
+        <Version>2.1.0.0</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Authors>Soar360</Authors>
-        <Description>read apk info (package name etc..) with out appt.</Description>
+        <Authors>Soar360 QL-Win</Authors>
+        <Description>Read apk and aab info (package name etc..) with out appt.</Description>
         <PackageProjectUrl>https://github.com/Soar360/apk-reader</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Soar360/apk-reader</RepositoryUrl>
-        <PackageTags>android apk apk-reader aapt</PackageTags>
+        <PackageTags>android apk apk-reader aab aab-reader aapt</PackageTags>
         <RepositoryType>git</RepositoryType>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
