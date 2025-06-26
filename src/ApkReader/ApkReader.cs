@@ -46,9 +46,10 @@ public class ApkReader<TApkInfo> where TApkInfo : ApkInfo, new()
         return false;
     }
 
-    protected virtual Dictionary<string, byte[]> ReadResources(Stream stream)
+    protected virtual void ReadResources(Stream stream, out Dictionary<string, byte[]> dic, out HashSet<string> abiSet)
     {
-        var dic = new Dictionary<string, byte[]>(StringComparer.CurrentCultureIgnoreCase);
+        abiSet = [];
+        dic = new Dictionary<string, byte[]>(StringComparer.CurrentCultureIgnoreCase);
         using (var zip = new ZipArchive(stream))
         {
             foreach (var entry in zip.Entries)
@@ -62,16 +63,27 @@ public class ApkReader<TApkInfo> where TApkInfo : ApkInfo, new()
                         dic[entry.FullName] = ms.ToArray();
                     }
                 }
+                else if (entry.FullName.StartsWith("lib/"))
+                {
+                    var relativePath = entry.FullName.Substring("lib/".Length);
+                    int slashIndex = relativePath.IndexOf('/');
+
+                    if (slashIndex > 0)
+                    {
+                        string abi = relativePath.Substring(0, slashIndex);
+                        abiSet.Add(abi);
+                    }
+                }
             }
         }
-        return dic;
     }
 
     public TApkInfo Read(Stream apkStream)
     {
         //解压ZIP文件
         //找到两个资源文件。
-        var resources = ReadResources(apkStream);
+        ReadResources(apkStream, out var resources, out var abiSet);
+
         if (!resources.ContainsKey("AndroidManifest.xml"))
         {
             throw new ApkReaderException("can not find 'AndroidManifest.xml' in apk file.");
@@ -94,6 +106,10 @@ public class ApkReader<TApkInfo> where TApkInfo : ApkInfo, new()
         foreach (var handler in ApkInfoHandlers)
         {
             handler.Execute(xmlDocument, arscFile, apkInfo);
+        }
+        foreach (var abi in abiSet)
+        {
+            apkInfo.Abis.Add(abi);
         }
         return apkInfo;
     }

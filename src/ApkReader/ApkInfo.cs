@@ -6,7 +6,6 @@ public class ApkInfo
 {
     public string VersionName { get; set; }
     public string VersionCode { get; set; }
-
     public string TargetSdkVersion { get; set; }
     public List<string> Permissions { get; } = [];
     public string PackageName { get; set; }
@@ -18,5 +17,6 @@ public class ApkInfo
     public bool HasIcon => Icons.Count > 0 || !string.IsNullOrEmpty(Icon);
     public List<string> Locales { get; } = [];
     public List<string> Densities { get; } = [];
+    public HashSet<string> Abis { get; } = [];
     public string LaunchableActivity { get; set; }
 }

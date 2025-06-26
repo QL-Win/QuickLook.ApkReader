@@ -50,15 +50,15 @@ public class AabReader<TAabInfo> where TAabInfo : AabInfo, new()
         return false;
     }
 
-    protected virtual Dictionary<string, byte[]> ReadResources(Stream stream)
+    protected virtual void ReadResources(Stream stream, out Dictionary<string, byte[]> dic, out HashSet<string> abiSet)
     {
-        var dic = new Dictionary<string, byte[]>(StringComparer.CurrentCultureIgnoreCase);
+        abiSet = [];
+        dic = new Dictionary<string, byte[]>(StringComparer.CurrentCultureIgnoreCase);
+
         using (var zip = new ZipArchive(stream))
         {
             foreach (var entry in zip.Entries)
             {
-                Console.WriteLine($"Processing entry: {entry.FullName}");
-
                 if (CheckIsResources(entry.FullName))
                 {
                     using (var fs = entry.Open())
@@ -68,16 +68,27 @@ public class AabReader<TAabInfo> where TAabInfo : AabInfo, new()
                         dic[entry.FullName] = ms.ToArray();
                     }
                 }
+                else if (entry.FullName.StartsWith("base/lib/"))
+                {
+                    var relativePath = entry.FullName.Substring("base/lib/".Length);
+                    int slashIndex = relativePath.IndexOf('/');
+
+                    if (slashIndex > 0)
+                    {
+                        string abi = relativePath.Substring(0, slashIndex);
+                        abiSet.Add(abi);
+                    }
+                }
             }
         }
-        return dic;
     }
 
     public TAabInfo Read(Stream apkStream)
     {
         //解压ZIP文件
         //找到两个资源文件。
-        var resources = ReadResources(apkStream);
+        ReadResources(apkStream, out var resources, out var abiSet);
+
         if (!resources.ContainsKey("base/manifest/AndroidManifest.xml"))
         {
             throw new ApkReaderException("can not find 'AndroidManifest.xml' in aab file.");
@@ -107,6 +118,10 @@ public class AabReader<TAabInfo> where TAabInfo : AabInfo, new()
             {
                 aabInfo.Icons.Add(ComputeMD5Hash(res.Key).Substring(0, 6), res.Key);
             }
+        }
+        foreach (var abi in abiSet)
+        {
+            aabInfo.Abis.Add(abi);
         }
         return aabInfo;
 
